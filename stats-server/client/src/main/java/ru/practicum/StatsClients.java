@@ -24,8 +24,8 @@ public class StatsClients {
     private static final String API_HIT = "/hit";
     private static final String API_STATS = "/stats?start=%s&end=%s&uris=%s&unique=%s";
 
-    @Autowired
-    public StatsClients(@Value("${STATS_SERVER_URL}") String serverUrl, RestTemplateBuilder builder) {
+
+    public StatsClients(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder builder) {
         restTemplate = builder
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
                 .requestFactory(HttpComponentsClientHttpRequestFactory::new)

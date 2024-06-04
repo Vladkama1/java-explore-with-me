@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
-public class MyExceptionHandler {
+public class ErrorHandler {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
@@ -23,4 +23,12 @@ public class MyExceptionHandler {
         log.error("Exception BadRequestException: {}, статус ответа: {}", e.getMessage(), HttpStatus.BAD_REQUEST);
         return new ResponseError(e.getMessage());
     }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseError handleValidateException(final ValidateException e) {
+        log.error("Exception ValidateException: {}, статус ответа: {}", e.getMessage(), HttpStatus.CONFLICT);
+        return new ResponseError(e.getMessage());
+    }
 }
+
