@@ -165,7 +165,7 @@ public class EventServiceImpl implements EventService {
                 .map(eventShortDto -> "/events/" + eventShortDto.getId())
                 .collect(Collectors.toList());
         log.info("Получение");
-        List<ViewStats> views = statsClient.getStats(START_DATE, END_DATE, uris, null);
+        List<ViewStats> views = statsClient.getStats(START_DATE, END_DATE, uris, true);
         if (views != null) {
             Map<Long, Long> mapIdHits = new HashMap<>();
             views.forEach(viewStats -> mapIdHits.put(getId(viewStats.getUri()), viewStats.getHits()));
@@ -196,7 +196,7 @@ public class EventServiceImpl implements EventService {
         }
         EventFullDto fullDto = mapToEventFullDto(event);
         List<String> uris = List.of("/events/" + event.getId());
-        List<ViewStats> views = statsClient.getStats(START_DATE, END_DATE, uris, null);
+        List<ViewStats> views = statsClient.getStats(START_DATE, END_DATE, uris, true);
         if (views != null) {
             fullDto.setViews(views.size());
         }

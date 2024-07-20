@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.EndpointHit;
 import ru.practicum.ViewStats;
+import ru.practicum.exception.BadRequestException;
 import ru.practicum.stats.model.Stats;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,11 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        if (start.isAfter(end)) {
+            throw BadRequestException.builder()
+                    .message("Start time can`t be after End time!")
+                    .build();
+        }
         if (uris == null || uris.isEmpty()) {
             if (unique) {
                 return repository.getAllStatsDistinctIp(start, end);

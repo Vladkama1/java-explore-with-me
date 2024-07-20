@@ -8,10 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.events.model.Location;
 
-import javax.validation.constraints.Future;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 
 import static ru.practicum.constants.Constants.PATTERN_DATE;
@@ -40,6 +37,7 @@ public class NewEventDto {
 
     Location location;
     Boolean paid = false;
+    @PositiveOrZero
     Integer participantLimit = 0;
     Boolean requestModeration = true;
 

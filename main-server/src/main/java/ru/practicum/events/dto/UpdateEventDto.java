@@ -10,6 +10,8 @@ import ru.practicum.events.enums.StateActionEvent;
 import ru.practicum.events.model.Location;
 
 import javax.validation.constraints.Future;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -35,6 +37,7 @@ public class UpdateEventDto {
 
     Location location;
     Boolean paid;
+    @PositiveOrZero
     Integer participantLimit;
     Boolean requestModeration;
     StateActionEvent stateAction;

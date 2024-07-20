@@ -18,7 +18,7 @@ import java.util.List;
 public class StatsClients {
     private final RestTemplate restTemplate;
     private static final String API_HIT = "/hit";
-    private static final String API_STATS = "/stats?start=%s&end=%s&uris=%s&unique=%s";
+    private static final String API_STATS = "/stats?start=%s&end=%s%s&unique=%s";
 
 
     public StatsClients(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder builder) {
@@ -37,7 +37,8 @@ public class StatsClients {
 
     public List<ViewStats> getStats(String start, String end, List<String> uris, Boolean unique) {
 
-        String url = String.format(API_STATS, start, end, uris, unique);
+        String urisParam = uris.isEmpty() ? "" : "&uris=" + String.join(",", uris);
+        String url = String.format(API_STATS, start, end, urisParam, unique);
 
         ResponseEntity<ViewStats[]> response = restTemplate.getForEntity(url, ViewStats[].class);
 
