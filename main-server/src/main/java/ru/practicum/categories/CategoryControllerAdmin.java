@@ -12,7 +12,6 @@ import javax.validation.Valid;
 @RequestMapping("/admin/categories")
 @RequiredArgsConstructor
 public class CategoryControllerAdmin {
-
     private final CategoryService categoryService;
     static final String CATEGORY_PATH = "/{catId}";
 

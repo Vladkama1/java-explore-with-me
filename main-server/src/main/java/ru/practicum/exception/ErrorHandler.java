@@ -25,7 +25,7 @@ public class ErrorHandler {
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(BadRequestException.class)
+    @ExceptionHandler(ValidateException.class)
     public ResponseError handleValidateException(final ValidateException e) {
         log.error("Exception ValidateException: {}, статус ответа: {}", e.getMessage(), HttpStatus.CONFLICT);
         return new ResponseError(e.getMessage());

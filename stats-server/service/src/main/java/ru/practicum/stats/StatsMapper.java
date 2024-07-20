@@ -1,21 +1,19 @@
 package ru.practicum.stats;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import ru.practicum.StatDTO;
-import ru.practicum.StatOutDTO;
+import lombok.experimental.UtilityClass;
+import ru.practicum.EndpointHit;
 import ru.practicum.stats.model.Stats;
 
 
-@Mapper(componentModel = "spring")
-public interface StatsMapper {
-    @Mappings
-            ({
-                    @Mapping(target = "id", ignore = true),
-                    @Mapping(target = "timestamp", source = "timestamp", dateFormat = "yyyy-MM-dd HH:mm:ss")
-            })
-    Stats toModel(StatDTO statDTO);
+@UtilityClass
+public class StatsMapper {
 
-    StatOutDTO toOutDTO(Stats stats);
+    public Stats mapToStat(EndpointHit endpointHit) {
+        Stats stats = new Stats();
+        stats.setApp(endpointHit.getApp());
+        stats.setUri(endpointHit.getUri());
+        stats.setIp(endpointHit.getIp());
+        stats.setTimestamp(endpointHit.getTimestamp());
+        return stats;
+    }
 }
