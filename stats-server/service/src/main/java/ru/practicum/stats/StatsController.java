@@ -4,36 +4,39 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.StatDTO;
-import ru.practicum.StatOutDTO;
+import ru.practicum.EndpointHit;
+import ru.practicum.ViewStats;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
+import static ru.practicum.Constant.DATE_PATTERN;
+
+
 @Slf4j
-@Validated
 @RestController
 @RequiredArgsConstructor
 public class StatsController {
-    private final StatsService statsService;
 
-    @GetMapping("/{stats}")
-    public List<StatOutDTO> findStats(@RequestParam() @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                                      @RequestParam() @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
-                                      @RequestParam(required = false) List<String> uris,
-                                      @RequestParam(defaultValue = "false") boolean unique) {
-        List<StatOutDTO> statOutDTOS = statsService.findStats(start, end, uris, unique);
-        log.info("Получение списка статистики: {}.", statOutDTOS.size());
-        return statOutDTOS;
+    private final StatsService service;
+
+    @PostMapping("/hit")
+    @ResponseStatus(value = HttpStatus.CREATED, reason = "Информация сохранена")
+    public void saveEndpointHit(@Valid @RequestBody EndpointHit endpointHit) {
+        log.info("Сохранить EndpointHit {}", endpointHit);
+        service.saveStat(endpointHit);
     }
 
-    @PostMapping("/{hit}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void saveStats(@Valid @RequestBody StatDTO statDTO) {
-        log.info("Внесение в базу статистики по Uri: {}.", statDTO.getUri());
-        statsService.saveStats(statDTO);
+    @GetMapping("/stats")
+    public Collection<ViewStats> getViewStats(@RequestParam("start") @DateTimeFormat(pattern = DATE_PATTERN) LocalDateTime start,
+                                              @RequestParam("end") @DateTimeFormat(pattern = DATE_PATTERN) LocalDateTime end,
+                                              @RequestParam(defaultValue = "") List<String> uris,
+                                              @RequestParam(defaultValue = "false") Boolean unique) {
+        log.info("Получение статистики с параметрами: дата начала {}, дата окончания {}, список URL-адресов {}, " +
+                "уникальные сущности {},", start, end, uris, unique);
+        return service.getStats(start, end, uris, unique);
     }
 }
