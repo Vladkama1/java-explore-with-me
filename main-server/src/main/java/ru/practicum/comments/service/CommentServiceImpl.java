@@ -33,7 +33,13 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
         final Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие с id = " + eventId + " не найдено"));
-        return CommentMapper.toCommentDto(commentRepository.save(CommentMapper.toComment(user, event, newCommentDto)));
+
+        if (newCommentDto.getText() == null || newCommentDto.getText().trim().isEmpty()) {
+            throw new NotFoundException("Текст комментария не может быть пустым");
+        }
+
+        Comment comment = CommentMapper.toComment(user, event, newCommentDto);
+        return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
 
     @Override
