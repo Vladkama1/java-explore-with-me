@@ -68,9 +68,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getAllEventsByUserId(Long userId, int from, int size) {
         log.info("Получение");
-        return eventRepository.findAllWithInitiatorByInitiatorId(userId, new PaginationSetup(from, size,
+        return eventRepository.findAllWithInitiatorByInitiator_Id(userId, new PaginationSetup(from, size,
                 Sort.unsorted())).stream().map(EventMapper::mapToEventShortDto).collect(Collectors.toList());
     }
+
 
     @Override
     public EventFullDto getEventById(Long userId, Long eventId) {
