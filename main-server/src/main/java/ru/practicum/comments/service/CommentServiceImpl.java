@@ -1,12 +1,11 @@
 package ru.practicum.comments.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.comments.dao.CommentRepository;
-import ru.practicum.comments.dto.CommentDto;
-import ru.practicum.comments.dto.NewCommentDto;
+import ru.practicum.comments.dto.CommentDTO;
+import ru.practicum.comments.dto.CommentOutDTO;
 import ru.practicum.comments.mapper.CommentMapper;
 import ru.practicum.comments.model.Comment;
 import ru.practicum.events.dao.EventRepository;
@@ -15,103 +14,56 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.users.dao.UserRepository;
 import ru.practicum.users.model.User;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
-    private final EventRepository eventRepository;
     private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
+    private final EventRepository eventRepository;
     private final UserRepository userRepository;
 
     @Override
-    @Transactional
-    public CommentDto saveComment(Long userId, Long eventId, NewCommentDto newCommentDto) {
-        final User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
-        final Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Событие с id = " + eventId + " не найдено"));
-
-        if (newCommentDto.getText() == null || newCommentDto.getText().trim().isEmpty()) {
-            throw new NotFoundException("Текст комментария не может быть пустым");
-        }
-
-        Comment comment = CommentMapper.toComment(user, event, newCommentDto);
-        return CommentMapper.toCommentDto(commentRepository.save(comment));
+    public CommentOutDTO saveComment(CommentDTO commentDTO, Long userId, Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие " + eventId + " не найдено"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь " + userId + " не найден"));
+        Comment comment = new Comment();
+        comment.setAuthor(user);
+        comment.setText(commentDTO.getText());
+        comment.setCreated(LocalDateTime.now());
+        comment.setEvent(event);
+        return commentMapper.toOutDTO(commentRepository.save(comment));
     }
 
     @Override
-    @Transactional
-    public CommentDto updateComment(Long userId, Long commentId, NewCommentDto commentDto) {
-        checkUser(userId);
-        final Comment comment = commentRepository.findByIdAndAuthorId(commentId, userId)
-                .orElseThrow(() -> new NotFoundException("Комментарий с id = " + commentId + " не найден"));
-        comment.setText(commentDto.getText());
-        return CommentMapper.toCommentDto(commentRepository.save(comment));
-    }
-
-    @Override
-    @Transactional
-    public CommentDto updateCommentByAdmin(Long commentId, NewCommentDto commentDto) {
-        final Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Комментарий с id = " + commentId + " не найден"));
-        comment.setText(commentDto.getText());
-        return CommentMapper.toCommentDto(commentRepository.save(comment));
-    }
-
-
-    @Override
-    public CommentDto getCommentById(Long userId, Long commentId) {
-        checkUser(userId);
-        return CommentMapper.toCommentDto(commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Комментарий с id = " + commentId + " не найден")));
-    }
-
-    @Override
-    public List<CommentDto> getCommentsByUserId(Long userId, PageRequest page) {
-        checkUser(userId);
-        return commentRepository.findAllByAuthorId(userId, page)
-                .stream()
-                .map(CommentMapper::toCommentDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<CommentDto> getCommentsForEvent(Long userId, Long eventId, PageRequest page) {
-        checkUser(userId);
-        if (!eventRepository.existsById(eventId))
-            throw new NotFoundException("Событие с id = " + eventId + " не найдено");
-        return commentRepository.findAllByEventId(eventId, page)
-                .stream()
-                .map(CommentMapper::toCommentDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional
-    public void deleteComment(Long userId, Long commentId) {
-        checkUser(userId);
+    public CommentOutDTO updateComment(CommentDTO commentDTO, Long userId, Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Комментарий с id = " + commentId + " не найден"));
+                .orElseThrow(() -> new NotFoundException("Комментарий " + commentId + " не найден"));
         if (!comment.getAuthor().getId().equals(userId)) {
-            throw new NotFoundException("Вы не являетесь автором");
+            throw new NotFoundException("Комментарий " + commentId + " не найден");
+        }
+        comment.setText(commentDTO.getText());
+        comment.setUpdated(LocalDateTime.now());
+        return commentMapper.toOutDTO(commentRepository.save(comment));
+    }
+
+    @Override
+    public void deleteComment(Long userId, Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("Комментарий " + commentId + " не найден"));
+        if (!comment.getAuthor().getId().equals(userId)) {
+            throw new NotFoundException("Комментарий " + commentId + " не найден");
         }
         commentRepository.deleteById(commentId);
     }
 
     @Override
-    @Transactional
-    public void deleteCommentByAdmin(Long commentId) {
-        if (!commentRepository.existsById(commentId))
-            throw new NotFoundException("Комментарий с id = " + commentId + " не найден");
+    public void deleteComment(Long commentId) {
         commentRepository.deleteById(commentId);
-    }
-
-    private void checkUser(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id = " + userId + " не найден");
-        }
     }
 }

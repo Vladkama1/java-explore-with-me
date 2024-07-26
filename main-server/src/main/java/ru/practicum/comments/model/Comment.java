@@ -1,33 +1,38 @@
 package ru.practicum.comments.model;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import ru.practicum.events.model.Event;
 import ru.practicum.users.model.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Data
 @Entity
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Table(name = "comments")
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "comments", schema = "public")
+@Getter
+@Setter
+@ToString
 public class Comment {
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    @Column(name = "text")
-    String text;
-    @ManyToOne
-    @JoinColumn(name = "event_id", referencedColumnName = "id")
-    Event event;
-    @ManyToOne
-    @JoinColumn(name = "author_id", referencedColumnName = "id")
-    User author;
-    @Column(name = "created")
-    LocalDateTime created;
+    private Long id;
+
+    @Column(nullable = false)
+    private String text;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "event_id")
+    private Event event;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "author_id")
+    private User author;
+
+    @Column
+    private LocalDateTime created;
+
+    @Column
+    private LocalDateTime updated;
 }
