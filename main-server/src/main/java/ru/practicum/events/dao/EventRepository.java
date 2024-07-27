@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
+    List<Event> findAllWithInitiatorByInitiator_Id(Long userId, PaginationSetup paginationSetup);
 
     @Query("select e " +
             "from Event AS e " +
